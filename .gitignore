@@ -1,0 +1,13 @@
+*
+!.config
+.config/*
+!.config/lvim
+.config/lvim/*
+!.config/lvim/config.lua
+!.config/htop
+!.config/htop/*
+#.config/htop/*
+#!.config/htop/htoprc
+
+
+!.gitignore
