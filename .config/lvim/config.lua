@@ -12,11 +12,14 @@ lvim.lsp.buffer_mappings.normal_mode['gl'] = { vim.lsp.buf.outgoing_calls, "outg
 lvim.lsp.buffer_mappings.normal_mode['gk'] = { vim.lsp.buf.incoming_calls, "incoming_calls" }
 lvim.lsp.buffer_mappings.normal_mode['mh'] = { vim.lsp.buf.document_highlight, "hightlight" }
 lvim.lsp.buffer_mappings.normal_mode['ml'] = { vim.lsp.buf.clear_references, "cancel hightlight" }
--- lvim.lsp.buffer_mappings.normal_mode['mf'] = { require('telescope.builtin').lsp_references, "reference" }
-lvim.keys.normal_mode['<leader>mc'] = "<Cmd>LTCreateBookmark<CR>"
-lvim.keys.normal_mode['<leader>mn'] = "<Cmd>LTCreateNotebook<CR>"
-lvim.keys.normal_mode['<leader>md'] = "<Cmd>LTDeleteBookmark<CR>"
-lvim.keys.normal_mode['<leader>mo'] = "<Cmd>LTOpenNotebook<CR>"
+
+lvim.builtin.which_key.mappings["m"] = {
+        name = "bookmark",
+        c = { "<Cmd>LTCreateBookmark<CR>", "create bookmark" },
+        n = { "<Cmd>LTCreateNotebook<CR>" , "create notebook"},
+        d = { "<Cmd>LTDeleteBookmark<CR>" , "delete bookmark"},
+        o = { "<Cmd>LTOpenNotebook<CR>" , "open nodebook"},
+}
 
 -- gq - format code
 -- zc - Close (fold) the current fold under the cursor.
@@ -130,6 +133,7 @@ local clangd_flags = {
         "--log=error",
         "--completion-style=detailed",
         "--pch-storage=memory", -- could also be disk
+        "--header-insertion=never",
         "--enable-config",    -- clangd 11+ supports reading from .clangd configuration file
         "--offset-encoding=utf-16", --temporary fix for null-ls
         -- "--limit-references=1000",
