@@ -4,10 +4,10 @@
 !.config/lvim
 .config/lvim/*
 !.config/lvim/config.lua
+!.config/lvim/ftplugin
+!.config/lvim/ftplugin/*
 !.config/htop
 !.config/htop/*
-#.config/htop/*
-#!.config/htop/htoprc
 
 
 !.gitignore
