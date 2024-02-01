@@ -31,7 +31,9 @@ lvim.builtin.which_key.mappings["m"] = {
 -- Vim cheatsheet, look for folds keys: https://devhints.io/vim
 vim.opt.foldmethod = "expr"                     -- default is "normal"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()" -- default is ""
+vim.opt.foldtext = [[substitute(getline(v:foldstart),'\\t',repeat('\ ',&tabstop),'g').'...'.trim(getline(v:foldend)) . ' (' . (v:foldend - v:foldstart + 1) . ' lines)']]
 vim.opt.foldenable = false                      -- if this option is true and fold method option is other than normal, every time a document is opened everything will be folded.
+vim.opt.foldlevel = 1
 
 
 lvim.builtin.treesitter.highlight.enable = true
