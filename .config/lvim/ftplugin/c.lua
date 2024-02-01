@@ -1,3 +1,5 @@
+vim.cmd("setlocal tabstop=8 shiftwidth=8 expandtab!")
+
 -- some settings can only passed as commandline flags, see `clangd --help`
 local clangd_flags = {
         "--background-index",

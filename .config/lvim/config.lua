@@ -1,7 +1,5 @@
 -- lvim.builtin.lualine.options.theme = "NeoSolarized"
 
-vim.opt.tabstop = 8
-vim.opt.shiftwidth = 8
 
 lvim.builtin.dap.active = true
 lvim.colorscheme = "NeoSolarized"
@@ -122,6 +120,7 @@ table.insert(lvim.plugins, {
         },
 })
 
+-- Any changes to lvim.lsp.automatic_configuration.skipped_servers must be followed by :LvimCacheReset to take effect.
 vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "clangd", "metals", "lua_ls" })
 local ok_status, NeoSolarized = pcall(require, "NeoSolarized")
 if ok_status then
