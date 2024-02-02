@@ -150,8 +150,12 @@ table.insert(lvim.plugins, {
 	{
 		"mfussenegger/nvim-jdtls",
 		ft = { "java" }
+	},
+	{
+		'mrcjkb/haskell-tools.nvim',
+		version = '^3', -- Recommended
+		ft = { 'haskell', 'lhaskell', 'cabal', 'cabalproject' },
 	}
-
 })
 -- rust
 vim.api.nvim_set_keymap("n", "<m-d>", "<cmd>RustOpenExternalDocs<Cr>", { noremap = true, silent = true })
@@ -177,9 +181,9 @@ lvim.builtin.which_key.mappings["C"] = {
   D = { "<cmd>lua require'crates'.show_dependencies_popup()<cr>", "[crates] show dependencies" },
 }
 
-
 -- Any changes to lvim.lsp.automatic_configuration.skipped_servers must be followed by :LvimCacheReset to take effect.
-vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "clangd", "metals", "lua_ls", "rust_analyzer", "jdtls" })
+vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers,
+	{ "hls", "clangd", "metals", "lua_ls", "rust_analyzer", "jdtls" })
 local ok_status, NeoSolarized = pcall(require, "NeoSolarized")
 if ok_status then
 	NeoSolarized.setup {

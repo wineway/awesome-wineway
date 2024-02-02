@@ -51,6 +51,20 @@ local start_lsp = function()
 				eclipse = {
 					downloadSources = true,
 				},
+				implementationsCodeLens = {
+					enabled = true,
+				},
+				referencesCodeLens = {
+					enabled = true,
+				},
+				references = {
+					includeDecompiledSources = true,
+				},
+				inlayHints = {
+					parameterNames = {
+						enabled = "all", -- literals, all, none
+					},
+				},
 				configuration = {
 					updateBuildConfiguration = "automatic",
 
@@ -69,6 +83,14 @@ local start_lsp = function()
 			require("lvim.lsp").common_on_attach(client, bufnr)
 		end,
 	}
+
+	vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+		pattern = { "*.java" },
+		callback = function()
+			local _, _ = pcall(vim.lsp.codelens.refresh)
+		end,
+	})
+
 	require('jdtls').start_or_attach(config)
 end
 
