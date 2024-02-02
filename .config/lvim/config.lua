@@ -90,7 +90,7 @@ local metals_configs = function()
 	}
 	metals_config.init_options.statusBarProvider = false
 	vim.api.nvim_create_autocmd("FileType", {
-		pattern = { "scala", "sbt", "java" },
+		pattern = { "scala", "sbt" },
 		callback = function() require("metals").initialize_or_attach(metals_config) end,
 		group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
 	})
@@ -147,6 +147,10 @@ table.insert(lvim.plugins, {
 			require("fidget").setup()
 		end,
 	},
+	{
+		"mfussenegger/nvim-jdtls",
+		ft = { "java" }
+	}
 
 })
 -- rust
@@ -175,7 +179,7 @@ lvim.builtin.which_key.mappings["C"] = {
 
 
 -- Any changes to lvim.lsp.automatic_configuration.skipped_servers must be followed by :LvimCacheReset to take effect.
-vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "clangd", "metals", "lua_ls", "rust_analyzer" })
+vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "clangd", "metals", "lua_ls", "rust_analyzer", "jdtls" })
 local ok_status, NeoSolarized = pcall(require, "NeoSolarized")
 if ok_status then
 	NeoSolarized.setup {
