@@ -171,9 +171,22 @@
 ((. (require :litee.calltree) :setup) {})
 ((. (require :litee.bookmarks) :setup) {})	
 
+
+(local bin_name :fennel-language-server)
+(local install_path (vim.fn.stdpath "data"))
+(when (not (vim.loop.fs_stat (.. install_path "/bin/" bin_name)))
+  (vim.notify_once (string.format "not found %s, installing" bin_name) vim.log.levels.INFO)
+  (vim.system [:cargo :install :--git "https://github.com/wineway/fennel-language-server" :--root install_path]
+              {:text true}
+              (fn [obj] 
+                (if (not= obj.code 0)
+                    (vim.print obj.stderr)
+                    (vim.print (string.format "%s installed" bin_name))))
+              ))
+
 (local lspconfig (require :lspconfig))
 (tset (require :lspconfig.configs) :fennel_language_server
-      {:default_config {:cmd [:/Users/wangyuwei/.cargo/bin/fennel-language-server]
+      {:default_config {:cmd [(.. install_path "/bin/" bin_name)]
                         :filetypes [:fennel]
                         :root_dir (lspconfig.util.root_pattern :fnl)
                         :settings {:fennel {:diagnostics {:globals [:vim :lvim]}
