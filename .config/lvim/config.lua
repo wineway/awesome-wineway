@@ -3,3 +3,4 @@ table.insert(lvim.plugins, {
 })
 require("hotpot")
 require("startup")
+

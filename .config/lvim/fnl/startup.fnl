@@ -33,7 +33,7 @@
 (set vim.opt.foldtext
      "substitute(getline(v:foldstart),'\\\\t',repeat('\\ ',&tabstop),'g').'...'.trim(getline(v:foldend)) . ' (' . (v:foldend - v:foldstart + 1) . ' lines)'")
 (set vim.opt.foldenable false)
-(set vim.opt.foldlevel 1)
+(set vim.opt.foldlevel 99)
 (set lvim.builtin.treesitter.highlight.enable true)
 
 ;; auto install treesitter parsers
@@ -134,7 +134,7 @@
 
 ;; Any changes to lvim.lsp.automatic_configuration.skipped_servers must be followed by :LvimCacheReset to take effect.
 (vim.list_extend lvim.lsp.automatic_configuration.skipped_servers
-                 [:hls :clangd :metals :lua_ls :rust_analyzer :jdtls])
+                 [:hls :clangd :metals :lua_ls :rust_analyzer :jdtls :fennel_language_server])
 (local (ok-status Neo-solarized) (pcall require :NeoSolarized))
 (when ok-status
   (Neo-solarized.setup {:enable_italics true
@@ -151,7 +151,7 @@
                                  :underline true
                                  :variables {}}
                         :terminal_colors false
-                        :transparent false}))
+                        :transparent true}))
 
 ;; (vim.api.nvim_buf_set_keymap buf :n :zo ":LTExpandCalltree<CR>" opts)
 ;; (vim.api.nvim_buf_set_keymap buf :n :zc ":LTCollapseCalltree<CR>" opts)
@@ -171,25 +171,61 @@
 ((. (require :litee.calltree) :setup) {})
 ((. (require :litee.bookmarks) :setup) {})	
 
+(fn client-is-configured [server-name ft]
+  (set-forcibly! ft (or ft vim.bo.filetype))
+  (local active-autocmds
+         (vim.api.nvim_get_autocmds {:event :FileType :pattern ft}))
+  (each [_ result (ipairs active-autocmds)]
+    (when (and (not= result.desc nil)
+               (result.desc:match (.. "server " server-name " ")))
+      (Log:debug (string.format "[%q] is already configured" server-name))
+      (lua "return true")))
+  false)	
 
-(local bin_name :fennel-language-server)
-(local install_path (vim.fn.stdpath "data"))
-(when (not (vim.loop.fs_stat (.. install_path "/bin/" bin_name)))
-  (vim.notify_once (string.format "not found %s, installing" bin_name) vim.log.levels.INFO)
-  (vim.system [:cargo :install :--git "https://github.com/wineway/fennel-language-server" :--root install_path]
-              {:text true}
-              (fn [obj] 
-                (if (not= obj.code 0)
-                    (vim.print obj.stderr)
-                    (vim.print (string.format "%s installed" bin_name))))
-              ))
+(fn buf-try-add [server-name bufnr]
+  (set-forcibly! bufnr (or bufnr (vim.api.nvim_get_current_buf)))
+  (: (. (. (require :lspconfig) server-name) :manager) :try_add_wrapper bufnr))	
 
-(local lspconfig (require :lspconfig))
-(tset (require :lspconfig.configs) :fennel_language_server
-      {:default_config {:cmd [(.. install_path "/bin/" bin_name)]
-                        :filetypes [:fennel]
-                        :root_dir (lspconfig.util.root_pattern :fnl)
-                        :settings {:fennel {:diagnostics {:globals [:vim :lvim]}
-                                            :workspace {:library (vim.api.nvim_list_runtime_paths)}}}
-                        :single_file_support true}})
-(lspconfig.fennel_language_server.setup {})
+(local fnl-cb (fn []
+  (local bin_name :fennel-language-server)
+  (local lsp_name :fennel_language_server)
+  (local utils (require "lvim.lsp.utils"))
+  (when (and (not (utils.is_client_active lsp_name)) (not (client-is-configured lsp_name)))
+    (local install_path (vim.fn.stdpath "data"))
+    (when (not (vim.loop.fs_stat (.. install_path "/bin/" bin_name)))
+      (vim.notify_once (string.format "not found %s, installing" bin_name) vim.log.levels.INFO)
+      (vim.system [:cargo :install :--git "https://github.com/wineway/fennel-language-server" :--root install_path]
+                  {:text true}
+                  (fn [obj] 
+                    (if (not= obj.code 0)
+                        (vim.print obj.stderr)
+                        (vim.print (string.format "%s installed" bin_name))))
+                  ))
+    
+    (local lspconfig (require :lspconfig))
+    (tset (require :lspconfig.configs) :fennel_language_server
+          {:default_config {:cmd [(.. install_path "/bin/" bin_name)]
+                            :filetypes [:fennel]
+                            :root_dir (lspconfig.util.root_pattern :fnl)
+                            :settings {:fennel {:diagnostics {:globals [:vim :lvim]}
+                                                :workspace {:library (vim.api.nvim_list_runtime_paths)}}}
+                            :single_file_support true}})
+    (local defaults
+           {:capabilities ((. (require :lvim.lsp) :common_capabilities))
+            :on_attach (. (require :lvim.lsp) :common_on_attach)
+            :on_exit (. (require :lvim.lsp) :common_on_exit)
+            :on_init (. (require :lvim.lsp) :common_on_init)})
+    (lspconfig.fennel_language_server.setup defaults)
+    (buf-try-add lsp_name)
+  )
+))
+
+(vim.api.nvim_create_autocmd :FileType
+                                 {:callback (fn [] 
+                                              (local (ok err) (pcall fnl-cb))
+                                              (when (not ok)
+                                                (vim.print err)))
+                                  :group (vim.api.nvim_create_augroup :nvim-fnl
+                                                                      {:clear true})
+                                  :pattern :fennel}
+)

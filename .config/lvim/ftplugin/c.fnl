@@ -18,6 +18,7 @@
   (vim.keymap.set :n :<leader>lH :<cmd>ClangdTypeHierarchy<cr> opts)
   (vim.keymap.set :n :<leader>lt :<cmd>ClangdSymbolInfo<cr> opts)
   (vim.keymap.set :n :<leader>lm :<cmd>ClangdMemoryUsage<cr> opts)
+  (vim.keymap.set :n :<leader>le "<cmd>lua vim.lsp.buf.hover()<cr>" opts)
   ((. (require :clangd_extensions.inlay_hints) :setup_autocmd))
   ((. (require :clangd_extensions.inlay_hints) :set_inlay_hints)))
 (local (status-ok project-config) (pcall require :rhel.clangd_wrl))
@@ -26,8 +27,9 @@
 (fn custom-on-init [client bufnr]
   ((. (require :lvim.lsp) :common_on_init) client bufnr)
   ((. (require :clangd_extensions.config) :setup) {})
-  (vim.cmd "  command ClangdToggleInlayHints lua require('clangd_extensions.inlay_hints').toggle_inlay_hints()
-  command -range ClangdAST lua require('clangd_extensions.ast').display_ast(<line1>, <line2>)
+  (vim.cmd
+  ;; "command ClangdToggleInlayHints lua require('clangd_extensions.inlay_hints').toggle_inlay_hints()
+  "command -range ClangdAST lua require('clangd_extensions.ast').display_ast(<line1>, <line2>)
   command ClangdTypeHierarchy lua require('clangd_extensions.type_hierarchy').show_hierarchy()
   command ClangdSymbolInfo lua require('clangd_extensions.symbol_info').show_symbol_info()
   command -nargs=? -complete=customlist,s:memuse_compl ClangdMemoryUsage lua require('clangd_extensions.memory_usage').show_memory_usage('<args>' == 'expand_preamble')
