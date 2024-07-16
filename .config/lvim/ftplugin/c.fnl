@@ -49,8 +49,9 @@
               :name "Launch file"
               :program (fn []
                          (var path nil)
-                         (vim.ui.input {:default (.. (vim.loop.cwd) :/build/)
-                                        :prompt "Path to executable: "}
+                         (vim.ui.input {:default (vim.loop.cwd)
+                                        :prompt "Path to executable: "
+                                        :completion :file}
                                        (fn [input] (set path input)))
                          (vim.cmd :redraw)
                          path)
